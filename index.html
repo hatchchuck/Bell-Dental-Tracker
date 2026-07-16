@@ -1,0 +1,1119 @@
+<!DOCTYPE html>
+<!-- saved from url=(0046)file:///C:/Users/hatch/Downloads/index_31.html -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dental Claim Tracker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com/">
+<link href="./index_files/css2" rel="stylesheet">
+<style>
+  :root {
+    --bg: #F4F6F4;
+    --surface: #FFFFFF;
+    --ink: #16241F;
+    --ink-soft: #58685F;
+    --ink-faint: #8B978F;
+    --accent: #2E6B5E;
+    --accent-soft: #E3EFEA;
+    --accent-line: #BFDAD0;
+    --warn: #B07B2C;
+    --warn-soft: #F6ECD9;
+    --danger: #A1483A;
+    --danger-soft: #F6E5E1;
+    --border: #DDE3DE;
+    --shadow: 0 1px 2px rgba(22,36,31,0.05), 0 4px 16px rgba(22,36,31,0.04);
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Inter', sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  .app { max-width: 920px; margin: 0 auto; padding: 40px 24px 80px; }
+
+  header.top { margin-bottom: 32px; }
+  header.top .eyebrow {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 0 0 8px;
+  }
+  header.top h1 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 30px;
+    font-weight: 700;
+    margin: 0 0 10px;
+    letter-spacing: -0.01em;
+  }
+  header.top p {
+    color: var(--ink-soft);
+    font-size: 15px;
+    line-height: 1.55;
+    max-width: 62ch;
+    margin: 0;
+  }
+
+  .how-it-works {
+    margin-top: 18px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--surface);
+  }
+  .how-it-works summary {
+    cursor: pointer;
+    padding: 12px 16px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--accent);
+    list-style: none;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .how-it-works summary::-webkit-details-marker { display: none; }
+  .how-it-works summary::before {
+    content: '›';
+    font-size: 16px;
+    transition: transform 0.15s ease;
+  }
+  .how-it-works[open] summary::before { transform: rotate(90deg); }
+  .how-it-works .body {
+    padding: 0 16px 16px;
+    font-size: 13.5px;
+    line-height: 1.6;
+    color: var(--ink-soft);
+  }
+  .how-it-works .body p { margin: 0 0 10px; }
+  .how-it-works .body p:last-child { margin-bottom: 0; }
+  .how-it-works .body strong { color: var(--ink); }
+  .steps { margin: 0 0 12px; padding-left: 20px; }
+  .steps li { margin-bottom: 6px; }
+
+  .summary-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin: 28px 0;
+  }
+  .stat {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+    box-shadow: var(--shadow);
+  }
+  .stat .label {
+    font-size: 11.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--ink-faint);
+    margin: 0 0 8px;
+    font-weight: 600;
+  }
+  .stat .value {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 22px;
+    font-weight: 600;
+    margin: 0;
+  }
+  .stat.flag .value { color: var(--warn); }
+  .stat.flag { border-color: var(--warn); background: var(--warn-soft); }
+  .stat.flag .label { color: var(--warn); }
+
+  .pool-banner {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    background: var(--accent);
+    color: white;
+    border-radius: 14px;
+    padding: 20px 22px;
+    margin-bottom: 20px;
+  }
+  .pool-banner .pool-label {
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin: 0 0 6px;
+    opacity: 0.85;
+  }
+  .pool-banner .pool-hint {
+    font-size: 12.5px;
+    margin: 0;
+    max-width: 42ch;
+    opacity: 0.85;
+    line-height: 1.5;
+  }
+  .pool-banner .pool-value {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 30px;
+    font-weight: 600;
+    margin: 0;
+    flex-shrink: 0;
+  }
+  @media (max-width: 640px) {
+    .pool-banner { flex-direction: column; align-items: flex-start; }
+  }
+
+  .toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .filters { display: flex; gap: 6px; flex-wrap: wrap; }
+  .filters button {
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    padding: 7px 13px;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--ink-soft);
+    cursor: pointer;
+  }
+  .filters button.active {
+    background: var(--ink);
+    color: var(--surface);
+    border-color: var(--ink);
+  }
+  .btn-primary {
+    font-family: 'Inter', sans-serif;
+    font-size: 13.5px;
+    font-weight: 600;
+    padding: 9px 16px;
+    border-radius: 8px;
+    border: none;
+    background: var(--accent);
+    color: white;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .btn-primary:hover { background: #255a4f; }
+
+  .entries { display: flex; flex-direction: column; gap: 10px; }
+  .empty {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--ink-faint);
+    font-size: 14px;
+    border: 1px dashed var(--border);
+    border-radius: 12px;
+    background: var(--surface);
+  }
+
+  .entry {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    box-shadow: var(--shadow);
+    overflow: hidden;
+  }
+  .entry-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 16px;
+    cursor: pointer;
+    gap: 12px;
+  }
+  .entry-head .left { min-width: 0; }
+  .entry-head .date {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11.5px;
+    color: var(--ink-faint);
+    margin: 0 0 3px;
+  }
+  .entry-head .desc {
+    font-weight: 600;
+    font-size: 15px;
+    margin: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .entry-head .right {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-shrink: 0;
+  }
+  .amount-charged {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 14px;
+    color: var(--ink-soft);
+  }
+  .status-pill {
+    font-size: 11.5px;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 999px;
+    white-space: nowrap;
+  }
+  .status-pill.awaiting { background: var(--accent-soft); color: var(--accent); }
+  .status-pill.ready { background: var(--warn-soft); color: var(--warn); }
+  .status-pill.complete { background: #EAEEEA; color: var(--ink-soft); }
+
+  .entry-body {
+    padding: 0 16px 18px;
+    border-top: 1px solid var(--border);
+  }
+  .figrow {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+    margin-top: 16px;
+  }
+  .fig .label { font-size: 11.5px; color: var(--ink-faint); margin: 0 0 4px; text-transform: uppercase; letter-spacing: .04em; font-weight: 600; }
+  .fig .val { font-family: 'IBM Plex Mono', monospace; font-size: 15px; }
+  .fig .val.warn { color: var(--warn); }
+  .fig .val.muted { color: var(--ink-faint); font-family: 'Inter', sans-serif; font-size: 13px; }
+
+  .meta-row {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-top: 14px;
+    font-size: 12.5px;
+    color: var(--ink-faint);
+  }
+  .meta-row span strong { color: var(--ink-soft); font-weight: 600; }
+
+  .withdraw-row {
+    margin-top: 18px;
+    padding: 14px 16px;
+    border-radius: 10px;
+    background: var(--warn-soft);
+    border: 1px solid #E8D3AC;
+  }
+  .withdraw-row .label { font-size: 12.5px; font-weight: 600; color: var(--warn); margin: 0 0 10px; }
+  .withdraw-row .row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+  .withdraw-row input {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 14px;
+    padding: 8px 10px;
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    width: 120px;
+  }
+  .withdraw-row button {
+    font-family: 'Inter', sans-serif;
+    font-size: 12.5px;
+    font-weight: 600;
+    padding: 8px 14px;
+    border-radius: 7px;
+    border: none;
+    background: var(--warn);
+    color: white;
+    cursor: pointer;
+  }
+
+  .notes-text { margin-top: 14px; font-size: 13px; color: var(--ink-soft); line-height: 1.5; white-space: pre-wrap; }
+
+  .entry-actions { margin-top: 16px; display: flex; gap: 10px; }
+  .entry-actions button {
+    font-size: 12.5px;
+    font-weight: 500;
+    background: none;
+    border: none;
+    color: var(--ink-faint);
+    cursor: pointer;
+    padding: 0;
+  }
+  .entry-actions button:hover { color: var(--ink); }
+  .entry-actions button.danger-link:hover { color: var(--danger); }
+
+  /* Modal */
+  .overlay {
+    position: fixed; inset: 0; background: rgba(22,36,31,0.35);
+    display: flex; align-items: flex-start; justify-content: center;
+    padding: 40px 16px; overflow-y: auto; z-index: 10;
+  }
+  .modal {
+    background: var(--surface);
+    border-radius: 14px;
+    width: 100%;
+    max-width: 480px;
+    padding: 24px;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.2);
+  }
+  .modal h2 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 19px;
+    margin: 0 0 4px;
+  }
+  .modal .subhead { font-size: 12.5px; color: var(--ink-faint); margin: 0 0 18px; }
+  .field { margin-bottom: 14px; }
+  .field label {
+    display: block;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--ink-soft);
+    margin-bottom: 5px;
+  }
+  .field input, .field textarea, .field select {
+    width: 100%;
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    padding: 9px 11px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--bg);
+    color: var(--ink);
+  }
+  .field textarea { resize: vertical; min-height: 60px; font-family: 'Inter', sans-serif; }
+  .field input:focus, .field textarea:focus, .field select:focus { outline: 2px solid var(--accent-line); border-color: var(--accent); }
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .section-label {
+    font-size: 11.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--ink-faint);
+    margin: 20px 0 10px;
+    padding-top: 14px;
+    border-top: 1px solid var(--border);
+  }
+  .section-label:first-of-type { border-top: none; padding-top: 0; margin-top: 0; }
+  .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
+  .btn-ghost {
+    font-family: 'Inter', sans-serif;
+    font-size: 13.5px;
+    font-weight: 500;
+    padding: 9px 16px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--ink-soft);
+    cursor: pointer;
+  }
+  .hint { font-size: 11.5px; color: var(--ink-faint); margin-top: 4px; }
+
+  .saved-badge {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow);
+    border-radius: 999px;
+    padding: 8px 16px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    font-weight: 600;
+    opacity: 0;
+    transform: translateY(8px);
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    pointer-events: none;
+    z-index: 20;
+  }
+  .saved-badge.show { opacity: 1; transform: translateY(0); }
+
+  @media (max-width: 640px) {
+    .summary-grid { grid-template-columns: 1fr 1fr; }
+    .figrow { grid-template-columns: 1fr; gap: 10px; }
+    .two-col { grid-template-columns: 1fr; }
+    .entry-head .desc { max-width: 160px; }
+  }
+</style>
+</head>
+<body>
+<div id="sync-warning" style="display: block; background: rgb(58, 42, 18); border-bottom: 2px solid var(--warn); color: rgb(242, 197, 114); font-family: &quot;IBM Plex Mono&quot;, monospace; font-size: 12px; padding: 8px 16px; text-align: center;">
+  ⚠ Couldn't reach the shared data store — showing the last saved copy on this device. Changes are cached locally and will sync once the connection's back.
+  <span onclick="retrySync()" style="text-decoration: underline; cursor: pointer; margin-left: 6px;">Retry</span>
+</div>
+<div class="saved-badge" id="saved-badge">✓ saved</div>
+<div class="app" id="app">
+    <header class="top">
+      <p class="eyebrow">Bell Dentistry · Delta Dental · HSA</p>
+      <h1>Dental Claim Tracker</h1>
+      <p>Bell Dentistry is paid in full out of pocket at time of service — not from the HSA. Bell is non-participating with Delta Dental, so it isn't bound to Delta's fee schedule and can charge more than what shows as the "accepted fee" on the EOB. The net cost is based on what you actually paid Bell, not Delta's benchmark — and that net amount is the one pulled from the HSA once the claim settles.</p>
+      <details class="how-it-works">
+        <summary>How this works</summary>
+        <div class="body">
+          <ol class="steps">
+            <li><strong>Pay out of pocket.</strong> Bell Dentistry is paid its actual charge at time of service, from checking or a card — not the HSA.</li>
+            <li><strong>Claim processes.</strong> Delta Dental calculates its payment off its own "accepted fee" benchmark — not Bell's actual bill, since Bell never agreed to that fee schedule. Delta reimburses part of it directly to you.</li>
+            <li><strong>Net cost is now known.</strong> What you actually paid Bell minus what Delta paid you = the real out-of-pocket cost. This can run higher than the EOB's "you pay" line, since that line only reflects Delta's benchmark, not any balance Bell billed above it.</li>
+            <li><strong>Pull that net amount from the HSA, once.</strong> Since the HSA is only reimbursing genuinely uncompensated cost, there's nothing to repay and nothing to report on Form 8889.</li>
+          </ol>
+          <p>You can reimburse yourself from an HSA for a qualified expense at any point after it's paid — there's no deadline — so there's no rush once a visit shows "Ready to withdraw." Confirm specifics with your HSA administrator or tax preparer.</p>
+        </div>
+      </details>
+    </header>
+
+    <div class="pool-banner">
+      <div>
+        <p class="pool-label">Holding Account Balance</p>
+        <p class="pool-hint">Cash pulled from the HSA to reimburse settled visits, available to help fund the next kid's payment to Bell without fronting extra outside cash.</p>
+      </div>
+      <p class="pool-value">$0.00</p>
+    </div>
+
+    <div class="summary-grid">
+      <div class="stat">
+        <p class="label">Paid to Bell Dentistry</p>
+        <p class="value">$0.00</p>
+      </div>
+      <div class="stat">
+        <p class="label">Reimbursed by Delta Dental</p>
+        <p class="value">$0.00</p>
+      </div>
+      <div class="stat">
+        <p class="label">Net Cost</p>
+        <p class="value">$0.00</p>
+      </div>
+      <div class="stat ">
+        <p class="label">Ready to Withdraw</p>
+        <p class="value">$0.00</p>
+      </div>
+    </div>
+
+    <div class="filters" style="margin-bottom:10px;">
+      
+        <button class="active" onclick="setPatientFilter(&#39;all&#39;)">
+          All patients
+        </button>
+      
+        <button class="" onclick="setPatientFilter(&#39;Hannah&#39;)">
+          Hannah
+        </button>
+      
+        <button class="" onclick="setPatientFilter(&#39;Chandler&#39;)">
+          Chandler
+        </button>
+      
+        <button class="" onclick="setPatientFilter(&#39;Kristen&#39;)">
+          Kristen
+        </button>
+      
+        <button class="" onclick="setPatientFilter(&#39;Riley&#39;)">
+          Riley
+        </button>
+      
+        <button class="" onclick="setPatientFilter(&#39;Carsen&#39;)">
+          Carsen
+        </button>
+      
+    </div>
+
+    <div class="toolbar">
+      <div class="filters">
+        
+          <button class="active" onclick="setFilter(&#39;all&#39;)">
+            All
+          </button>
+        
+          <button class="" onclick="setFilter(&#39;awaiting&#39;)">
+            Awaiting claim
+          </button>
+        
+          <button class="" onclick="setFilter(&#39;ready&#39;)">
+            Ready to withdraw
+          </button>
+        
+          <button class="" onclick="setFilter(&#39;complete&#39;)">
+            Complete
+          </button>
+        
+      </div>
+      <button class="btn-primary" onclick="openAddModal()">+ Add visit</button>
+    </div>
+
+    <div class="entries">
+      <div class="empty">No visits here yet.</div>
+    </div>
+
+    
+  </div>
+
+<script>
+const STORAGE_KEY = 'dental_tracker_v1';
+const PATIENTS = ['Hannah', 'Chandler', 'Kristen', 'Riley', 'Carsen'];
+let entries = [];
+let filter = 'all';
+let patientFilter = 'all';
+let openId = null;
+let modalOpen = false;
+let editingEntry = null;
+let loaded = false;
+
+function uid() { return 'e' + Date.now() + Math.random().toString(36).slice(2,7); }
+
+function fmt(n) {
+  if (n === null || n === undefined || isNaN(n)) return '—';
+  return '$' + Number(n).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+}
+function fmtDate(d) {
+  if (!d) return '';
+  const dt = new Date(d + 'T00:00:00');
+  return dt.toLocaleDateString('en-US', {month: 'short', day: 'numeric', year: 'numeric'});
+}
+function num(v) { const n = parseFloat(v); return isNaN(n) ? null : n; }
+
+// --- Cloud sync (shared gist-proxy, same pattern as Hannah/Chandler/Carsen apps) ---
+const GIST_ID = '1b8dad0fa36cd19de2064efc49e9f515';
+const GIST_FILE = 'dental-tracker.json';
+const PROXY_URL = 'https://carsen-dashboard.netlify.app/.netlify/functions/gist-proxy';
+const PROXY_SECRET = 'wKvHQAl1oESH_ZZVN6JYlytdc3aKn_6l';
+let isSyncing = false;
+let initialLoadComplete = false;
+let saveTimer = null;
+
+async function gistFetch(body, { retries = 2, timeoutMs = 12000 } = {}) {
+  let lastErr;
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), timeoutMs);
+    try {
+      const resp = await fetch(PROXY_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+        signal: controller.signal
+      });
+      clearTimeout(timer);
+      if ((resp.status === 429 || resp.status >= 500) && attempt < retries) {
+        lastErr = new Error('proxy-transient-' + resp.status);
+        await new Promise(r => setTimeout(r, 600 * Math.pow(2, attempt)));
+        continue;
+      }
+      return resp;
+    } catch (e) {
+      clearTimeout(timer);
+      const retryable = e.name === 'AbortError' || e instanceof TypeError;
+      if (retryable && attempt < retries) {
+        lastErr = e;
+        await new Promise(r => setTimeout(r, 600 * Math.pow(2, attempt)));
+        continue;
+      }
+      throw e;
+    }
+  }
+  throw lastErr;
+}
+
+function showSyncWarning() {
+  const el = document.getElementById('sync-warning');
+  if (el) el.style.display = 'block';
+}
+function hideSyncWarning() {
+  const el = document.getElementById('sync-warning');
+  if (el) el.style.display = 'none';
+}
+function showBadge(text, color, duration) {
+  const b = document.getElementById('saved-badge');
+  if (!b) return;
+  b.textContent = text;
+  b.style.color = color;
+  b.classList.add('show');
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(() => { b.classList.remove('show'); b.textContent = '✓ saved'; }, duration);
+}
+
+async function loadFromCloud() {
+  try {
+    const resp = await gistFetch({ secret: PROXY_SECRET, action: 'load', gistId: GIST_ID, file: GIST_FILE });
+    if (resp.ok) {
+      const data = await resp.json();
+      const content = data.content;
+      if (content) { hideSyncWarning(); return JSON.parse(content); }
+      hideSyncWarning();
+      return null;
+    }
+    showSyncWarning();
+    return null;
+  } catch (e) {
+    showSyncWarning();
+    return null;
+  }
+}
+
+async function loadFromStorage() {
+  const data = await loadFromCloud();
+  const src = data && Array.isArray(data.entries) ? data : null;
+  if (!src) {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) {
+        const d = JSON.parse(raw);
+        if (d && Array.isArray(d.entries)) { entries = d.entries; return true; }
+      }
+    } catch (e) {}
+    return false;
+  }
+  entries = src.entries;
+  return true;
+}
+
+async function saveToCloud(data) {
+  if (isSyncing) return;
+  isSyncing = true;
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); } catch (e) {}
+  if (!initialLoadComplete) { isSyncing = false; return; }
+  try {
+    const resp = await gistFetch({ secret: PROXY_SECRET, action: 'save', gistId: GIST_ID, file: GIST_FILE, data });
+    if (resp.ok) {
+      hideSyncWarning();
+      showBadge('✓ saved', 'var(--accent)', 2000);
+    } else {
+      showSyncWarning();
+      showBadge('⚠ sync error', '#A1483A', 4000);
+    }
+  } catch (e) {
+    showSyncWarning();
+    showBadge('⚠ offline', '#B07B2C', 3000);
+  }
+  isSyncing = false;
+}
+
+function debouncedSave() {
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(() => {
+    saveToCloud({ entries, savedAt: new Date().toISOString() });
+  }, 600);
+}
+
+async function load() {
+  try {
+    await loadFromStorage();
+  } catch (e) {
+    entries = [];
+  }
+  initialLoadComplete = true;
+  loaded = true;
+  render();
+}
+function persist() { debouncedSave(); }
+async function retrySync() {
+  await loadFromStorage();
+  render();
+}
+
+function reimbursedOf(e) { return num(e.reimbursementAmount); }
+function paidFromHoldingOf(e) { return num(e.paidFromHolding) || 0; }
+function balanceBilledOf(e) {
+  const accepted = num(e.acceptedFee);
+  if (accepted === null) return null;
+  return Math.max(0, (num(e.amountCharged) || 0) - accepted);
+}
+function netOwedOf(e) {
+  const r = reimbursedOf(e);
+  if (r === null) return null;
+  return (num(e.amountCharged) || 0) - r;
+}
+function hsaWithdrawnOf(e) { return num(e.hsaWithdrawnAmount) || 0; }
+
+function computeHoldingBalance() {
+  let balance = 0;
+  entries.forEach(e => {
+    balance += hsaWithdrawnOf(e);
+    balance -= paidFromHoldingOf(e);
+  });
+  return balance;
+}
+
+function statusOf(e) {
+  const net = netOwedOf(e);
+  if (net === null) return 'awaiting';
+  if (hsaWithdrawnOf(e) < net - 0.005) return 'ready';
+  return 'complete';
+}
+
+function setFilter(f) { filter = f; render(); }
+function setPatientFilter(p) { patientFilter = p; render(); }
+function toggleOpen(id) { openId = (openId === id) ? null : id; render(); }
+
+function openAddModal() {
+  editingEntry = {
+    id: null, patient: patientFilter !== 'all' ? patientFilter : '',
+    serviceDate: '', description: '', dentist: '', claimNumber: '',
+    amountCharged: '', acceptedFee: '', paidFromHolding: '', claimSubmittedDate: '',
+    reimbursementAmount: '', reimbursementDate: '',
+    hsaWithdrawnAmount: '', hsaWithdrawnDate: '', notes: ''
+  };
+  modalOpen = true;
+  render();
+}
+function openEditModal(id) {
+  editingEntry = { ...entries.find(x => x.id === id) };
+  modalOpen = true;
+  render();
+}
+function closeModal() { modalOpen = false; editingEntry = null; render(); }
+
+function saveModal(formData) {
+  if (editingEntry.id) {
+    entries = entries.map(e => e.id === editingEntry.id ? { ...editingEntry, ...formData } : e);
+  } else {
+    entries.push({ id: uid(), ...editingEntry, ...formData });
+  }
+  persist();
+  modalOpen = false;
+  editingEntry = null;
+  render();
+}
+function deleteEntry(id) {
+  entries = entries.filter(e => e.id !== id);
+  persist();
+  render();
+}
+
+function markWithdrawn(id) {
+  const amtInput = document.getElementById('withdraw-amt-' + id);
+  const dateInput = document.getElementById('withdraw-date-' + id);
+  const amt = amtInput ? amtInput.value : '';
+  const date = dateInput ? dateInput.value : '';
+  entries = entries.map(e => e.id === id ? { ...e, hsaWithdrawnAmount: amt, hsaWithdrawnDate: date || e.hsaWithdrawnDate } : e);
+  persist();
+  render();
+}
+
+function filteredEntries() {
+  let list = [...entries].sort((a, b) => (b.serviceDate || '').localeCompare(a.serviceDate || ''));
+  if (patientFilter !== 'all') list = list.filter(e => e.patient === patientFilter);
+  if (filter === 'awaiting') return list.filter(e => statusOf(e) === 'awaiting');
+  if (filter === 'ready') return list.filter(e => statusOf(e) === 'ready');
+  if (filter === 'complete') return list.filter(e => statusOf(e) === 'complete');
+  return list;
+}
+
+function computeSummaryFor(list) {
+  let totalCharged = 0, totalReimbursed = 0, totalNet = 0, readyToWithdraw = 0;
+  list.forEach(e => {
+    totalCharged += num(e.amountCharged) || 0;
+    const r = reimbursedOf(e);
+    if (r !== null) totalReimbursed += r;
+    const net = netOwedOf(e);
+    if (net !== null) {
+      totalNet += net;
+      if (statusOf(e) === 'ready') readyToWithdraw += (net - hsaWithdrawnOf(e));
+    }
+  });
+  return { totalCharged, totalReimbursed, totalNet, readyToWithdraw };
+}
+
+function render() {
+  const app = document.getElementById('app');
+  if (!loaded) { app.innerHTML = '<p style="padding:40px;color:#8B978F;font-family:Inter,sans-serif;">Loading…</p>'; return; }
+
+  const patientScoped = patientFilter === 'all' ? entries : entries.filter(e => e.patient === patientFilter);
+  const s = computeSummaryFor(patientScoped);
+  const list = filteredEntries();
+
+  app.innerHTML = `
+    <header class="top">
+      <p class="eyebrow">Bell Dentistry · Delta Dental · HSA</p>
+      <h1>Dental Claim Tracker</h1>
+      <p>Bell Dentistry is paid in full out of pocket at time of service — not from the HSA. Bell is non-participating with Delta Dental, so it isn't bound to Delta's fee schedule and can charge more than what shows as the "accepted fee" on the EOB. The net cost is based on what you actually paid Bell, not Delta's benchmark — and that net amount is the one pulled from the HSA once the claim settles.</p>
+      <details class="how-it-works">
+        <summary>How this works</summary>
+        <div class="body">
+          <ol class="steps">
+            <li><strong>Pay out of pocket.</strong> Bell Dentistry is paid its actual charge at time of service, from checking or a card — not the HSA.</li>
+            <li><strong>Claim processes.</strong> Delta Dental calculates its payment off its own "accepted fee" benchmark — not Bell's actual bill, since Bell never agreed to that fee schedule. Delta reimburses part of it directly to you.</li>
+            <li><strong>Net cost is now known.</strong> What you actually paid Bell minus what Delta paid you = the real out-of-pocket cost. This can run higher than the EOB's "you pay" line, since that line only reflects Delta's benchmark, not any balance Bell billed above it.</li>
+            <li><strong>Pull that net amount from the HSA, once.</strong> Since the HSA is only reimbursing genuinely uncompensated cost, there's nothing to repay and nothing to report on Form 8889.</li>
+          </ol>
+          <p>You can reimburse yourself from an HSA for a qualified expense at any point after it's paid — there's no deadline — so there's no rush once a visit shows "Ready to withdraw." Confirm specifics with your HSA administrator or tax preparer.</p>
+        </div>
+      </details>
+    </header>
+
+    <div class="pool-banner">
+      <div>
+        <p class="pool-label">Holding Account Balance</p>
+        <p class="pool-hint">Cash pulled from the HSA to reimburse settled visits, available to help fund the next kid's payment to Bell without fronting extra outside cash.</p>
+      </div>
+      <p class="pool-value">${fmt(computeHoldingBalance())}</p>
+    </div>
+
+    <div class="summary-grid">
+      <div class="stat">
+        <p class="label">Paid to Bell Dentistry${patientFilter !== 'all' ? ' · ' + patientFilter : ''}</p>
+        <p class="value">${fmt(s.totalCharged)}</p>
+      </div>
+      <div class="stat">
+        <p class="label">Reimbursed by Delta Dental${patientFilter !== 'all' ? ' · ' + patientFilter : ''}</p>
+        <p class="value">${fmt(s.totalReimbursed)}</p>
+      </div>
+      <div class="stat">
+        <p class="label">Net Cost${patientFilter !== 'all' ? ' · ' + patientFilter : ''}</p>
+        <p class="value">${fmt(s.totalNet)}</p>
+      </div>
+      <div class="stat ${s.readyToWithdraw > 0 ? 'flag' : ''}">
+        <p class="label">Ready to Withdraw${patientFilter !== 'all' ? ' · ' + patientFilter : ''}</p>
+        <p class="value">${fmt(s.readyToWithdraw)}</p>
+      </div>
+    </div>
+
+    <div class="filters" style="margin-bottom:10px;">
+      ${['all', ...PATIENTS].map(p => `
+        <button class="${patientFilter === p ? 'active' : ''}" onclick="setPatientFilter('${p}')">
+          ${p === 'all' ? 'All patients' : p}
+        </button>
+      `).join('')}
+    </div>
+
+    <div class="toolbar">
+      <div class="filters">
+        ${['all','awaiting','ready','complete'].map(f => `
+          <button class="${filter === f ? 'active' : ''}" onclick="setFilter('${f}')">
+            ${f === 'all' ? 'All' : f === 'awaiting' ? 'Awaiting claim' : f === 'ready' ? 'Ready to withdraw' : 'Complete'}
+          </button>
+        `).join('')}
+      </div>
+      <button class="btn-primary" onclick="openAddModal()">+ Add visit</button>
+    </div>
+
+    <div class="entries">
+      ${list.length === 0 ? `<div class="empty">No visits here yet.</div>` : list.map(e => renderEntry(e)).join('')}
+    </div>
+
+    ${modalOpen ? renderModal() : ''}
+  `;
+
+  if (modalOpen) wireModal();
+}
+
+function renderEntry(e) {
+  const status = statusOf(e);
+  const net = netOwedOf(e);
+  const reimbursed = reimbursedOf(e);
+  const withdrawn = hsaWithdrawnOf(e);
+  const charged = num(e.amountCharged) || 0;
+  const isOpen = openId === e.id;
+
+  const pillLabel = status === 'awaiting' ? 'Awaiting claim' : status === 'ready' ? 'Ready to withdraw' : 'Complete';
+  const remaining = net !== null ? Math.max(0, net - withdrawn) : 0;
+
+  return `
+    <div class="entry">
+      <div class="entry-head" onclick="toggleOpen('${e.id}')">
+        <div class="left">
+          <p class="date">${fmtDate(e.serviceDate)} · ${escapeHtml(e.patient || 'Unassigned')}</p>
+          <p class="desc">${escapeHtml(e.description || 'Untitled visit')}</p>
+        </div>
+        <div class="right">
+          <span class="amount-charged">${fmt(charged)}</span>
+          <span class="status-pill ${status}">${pillLabel}</span>
+        </div>
+      </div>
+      ${isOpen ? `
+        <div class="entry-body">
+          <div class="figrow">
+            <div class="fig">
+              <p class="label">Paid out of pocket</p>
+              <p class="val">${fmt(charged)}</p>
+            </div>
+            <div class="fig">
+              <p class="label">Reimbursed by Delta</p>
+              <p class="val ${reimbursed === null ? 'muted' : ''}">${reimbursed === null ? 'Pending' : fmt(reimbursed)}</p>
+            </div>
+            <div class="fig">
+              <p class="label">Net cost</p>
+              <p class="val ${net === null ? 'muted' : ''}">${net === null ? 'Unknown until claim settles' : fmt(net)}</p>
+            </div>
+            <div class="fig">
+              <p class="label">Withdrawn from HSA</p>
+              <p class="val">${fmt(withdrawn)}</p>
+            </div>
+            ${paidFromHoldingOf(e) > 0 ? `
+            <div class="fig">
+              <p class="label">Paid from holding account</p>
+              <p class="val">${fmt(paidFromHoldingOf(e))}</p>
+            </div>
+            ` : ''}
+          </div>
+
+          <div class="meta-row">
+            ${e.dentist ? `<span>Dentist: <strong>${escapeHtml(e.dentist)}</strong></span>` : ''}
+            ${e.claimNumber ? `<span>Claim #: <strong>${escapeHtml(e.claimNumber)}</strong></span>` : ''}
+            ${e.claimSubmittedDate ? `<span>Submitted: <strong>${fmtDate(e.claimSubmittedDate)}</strong></span>` : ''}
+            ${e.acceptedFee ? `<span>Delta's accepted fee: <strong>${fmt(num(e.acceptedFee))}</strong></span>` : ''}
+            ${balanceBilledOf(e) > 0 ? `<span>Billed above Delta's fee: <strong>${fmt(balanceBilledOf(e))}</strong></span>` : ''}
+          </div>
+
+          ${status === 'ready' ? `
+            <div class="withdraw-row">
+              <p class="label">Pull ${fmt(remaining)} from the HSA to reimburse yourself</p>
+              <div class="row">
+                <input type="number" step="0.01" id="withdraw-amt-${e.id}" value="${remaining.toFixed(2)}">
+                <input type="date" id="withdraw-date-${e.id}">
+                <button onclick="markWithdrawn('${e.id}')">Mark withdrawn</button>
+              </div>
+            </div>
+          ` : ''}
+
+          ${e.notes ? `<p class="notes-text">${escapeHtml(e.notes)}</p>` : ''}
+
+          <div class="entry-actions">
+            <button onclick="event.stopPropagation(); openEditModal('${e.id}')">Edit</button>
+            <button class="danger-link" onclick="event.stopPropagation(); deleteEntry('${e.id}')">Delete</button>
+          </div>
+        </div>
+      ` : ''}
+    </div>
+  `;
+}
+
+function renderModal() {
+  const e = editingEntry;
+  const isNew = !e.id;
+  const claimKnown = !isNew;
+  const netKnown = !isNew && e.reimbursementAmount !== null && e.reimbursementAmount !== undefined && e.reimbursementAmount !== '';
+
+  return `
+    <div class="overlay" id="overlay">
+      <div class="modal">
+        <h2>${isNew ? 'Add visit' : 'Edit visit'}</h2>
+        <p class="subhead">${isNew ? "Just what's known at time of service — add the Delta Dental and HSA details once they come in." : "Fields match what Delta Dental's claim details page shows, so you can copy straight across."}</p>
+        <form id="entry-form">
+          <div class="field">
+            <label>Patient</label>
+            <select name="patient" required>
+              <option value="" ${!e.patient ? 'selected' : ''} disabled>Select a patient</option>
+              ${PATIENTS.map(p => `<option value="${p}" ${e.patient === p ? 'selected' : ''}>${p}</option>`).join('')}
+            </select>
+          </div>
+          <div class="two-col">
+            <div class="field">
+              <label>Visit date of service</label>
+              <input type="date" name="serviceDate" value="${e.serviceDate || ''}" required>
+            </div>
+            <div class="field">
+              <label>Bell Dentistry charge (what you actually paid)</label>
+              <input type="number" step="0.01" name="amountCharged" value="${e.amountCharged || ''}" placeholder="0.00" required>
+            </div>
+          </div>
+          <div class="field">
+            <label>Description</label>
+            <input type="text" name="description" value="${escapeAttr(e.description || '')}" placeholder="e.g. Cleaning + exam, Crown tooth #14">
+          </div>
+          <div class="field">
+            <label>Paid from holding account</label>
+            <input type="number" step="0.01" name="paidFromHolding" value="${e.paidFromHolding || ''}" placeholder="0.00 if paid entirely from checking">
+            <p class="hint">Optional — how much of this visit's charge came from the holding account instead of fresh cash. Doesn't affect the net cost calculation below.</p>
+          </div>
+          <div class="two-col">
+            <div class="field">
+              <label>Dentist</label>
+              <input type="text" name="dentist" value="${escapeAttr(e.dentist || '')}" placeholder="e.g. Joyce Crowe">
+            </div>
+            <div class="field">
+              <label>Claim number</label>
+              <input type="text" name="claimNumber" value="${escapeAttr(e.claimNumber || '')}" placeholder="Optional">
+            </div>
+          </div>
+
+          ${claimKnown ? `
+          <p class="section-label">Delta Dental claim</p>
+          <div class="field">
+            <label>Delta Dental's accepted fee (per EOB, for reference)</label>
+            <input type="number" step="0.01" name="acceptedFee" value="${e.acceptedFee || ''}" placeholder="0.00">
+            <p class="hint">Bell is non-participating, so this is just Delta's own benchmark — not what you actually owe. It's only here to show the balance-billed gap.</p>
+          </div>
+          <div class="two-col">
+            <div class="field">
+              <label>Claim submitted</label>
+              <input type="date" name="claimSubmittedDate" value="${e.claimSubmittedDate || ''}">
+            </div>
+            <div class="field">
+              <label>Delta Dental pays</label>
+              <input type="number" step="0.01" name="reimbursementAmount" value="${e.reimbursementAmount || ''}" placeholder="Leave blank if pending">
+            </div>
+          </div>
+          <div class="field">
+            <label>Reimbursement date</label>
+            <input type="date" name="reimbursementDate" value="${e.reimbursementDate || ''}">
+            <p class="hint">Leave "Delta Dental pays" blank until the claim actually processes.</p>
+          </div>
+          ` : `
+          <input type="hidden" name="acceptedFee" value="">
+          <input type="hidden" name="claimSubmittedDate" value="">
+          <input type="hidden" name="reimbursementAmount" value="">
+          <input type="hidden" name="reimbursementDate" value="">
+          <p class="hint" style="margin-top:6px;">Once this visit is saved, edit it to log the Delta Dental claim when it settles.</p>
+          `}
+
+          ${netKnown ? `
+          <p class="section-label">HSA reimbursement to you</p>
+          <div class="two-col">
+            <div class="field">
+              <label>Amount withdrawn</label>
+              <input type="number" step="0.01" name="hsaWithdrawnAmount" value="${e.hsaWithdrawnAmount || ''}" placeholder="Leave blank if not yet taken">
+            </div>
+            <div class="field">
+              <label>Withdrawal date</label>
+              <input type="date" name="hsaWithdrawnDate" value="${e.hsaWithdrawnDate || ''}">
+            </div>
+          </div>
+          ` : `
+          <input type="hidden" name="hsaWithdrawnAmount" value="${e.hsaWithdrawnAmount || ''}">
+          <input type="hidden" name="hsaWithdrawnDate" value="${e.hsaWithdrawnDate || ''}">
+          `}
+
+          <div class="field">
+            <label>Notes</label>
+            <textarea name="notes" placeholder="Optional">${escapeHtml(e.notes || '')}</textarea>
+          </div>
+          <div class="modal-actions">
+            <button type="button" class="btn-ghost" onclick="closeModal()">Cancel</button>
+            <button type="submit" class="btn-primary">${isNew ? 'Add visit' : 'Save changes'}</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  `;
+}
+
+function wireModal() {
+  const overlay = document.getElementById('overlay');
+  overlay.addEventListener('click', (ev) => { if (ev.target === overlay) closeModal(); });
+  const form = document.getElementById('entry-form');
+  form.addEventListener('submit', (ev) => {
+    ev.preventDefault();
+    const fd = new FormData(form);
+    const data = {
+      patient: fd.get('patient'),
+      serviceDate: fd.get('serviceDate'),
+      amountCharged: fd.get('amountCharged'),
+      description: fd.get('description'),
+      dentist: fd.get('dentist'),
+      claimNumber: fd.get('claimNumber'),
+      acceptedFee: fd.get('acceptedFee') === '' ? null : fd.get('acceptedFee'),
+      paidFromHolding: fd.get('paidFromHolding') === '' ? null : fd.get('paidFromHolding'),
+      claimSubmittedDate: fd.get('claimSubmittedDate'),
+      reimbursementAmount: fd.get('reimbursementAmount') === '' ? null : fd.get('reimbursementAmount'),
+      reimbursementDate: fd.get('reimbursementDate'),
+      hsaWithdrawnAmount: fd.get('hsaWithdrawnAmount') === '' ? null : fd.get('hsaWithdrawnAmount'),
+      hsaWithdrawnDate: fd.get('hsaWithdrawnDate'),
+      notes: fd.get('notes'),
+    };
+    saveModal(data);
+  });
+}
+
+function escapeHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+function escapeAttr(str) {
+  return String(str).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+load();
+</script>
+
+
+</body></html>
