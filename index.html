@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- saved from url=(0046)file:///C:/Users/hatch/Downloads/index_35.html -->
+<!-- saved from url=(0046)file:///C:/Users/hatch/Downloads/index_36.html -->
 <html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -639,7 +639,8 @@ function paidToBellOf(e) {
   return p !== null ? p : Math.max(0, (num(e.amountBilled) || 0) - creditAppliedOf(e));
 }
 function unpaidBalanceOf(e) {
-  return Math.max(0, (num(e.amountBilled) || 0) - creditAppliedOf(e) - paidToBellOf(e));
+  const reimbursed = reimbursedOf(e) || 0;
+  return Math.max(0, (num(e.amountBilled) || 0) - creditAppliedOf(e) - paidToBellOf(e) - reimbursed);
 }
 function statusOf(e) {
   const reimbursed = reimbursedOf(e);
