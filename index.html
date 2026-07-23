@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- saved from url=(0046)file:///C:/Users/hatch/Downloads/index_36.html -->
+<!-- saved from url=(0046)file:///C:/Users/hatch/Downloads/index_37.html -->
 <html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -85,6 +85,38 @@
   .stat.hsa .label, .stat.hsa .value { color: var(--accent); }
   .stat.balance { border-color: var(--warn); background: var(--warn-soft); }
   .stat.balance .label, .stat.balance .value { color: var(--warn); }
+
+  .credit-banner {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    background: var(--accent);
+    color: white;
+    border-radius: 14px;
+    padding: 18px 20px;
+    margin-bottom: 16px;
+  }
+  .credit-banner .credit-label {
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin: 0 0 6px;
+    opacity: 0.9;
+  }
+  .credit-banner .credit-hint {
+    font-size: 12px;
+    margin: 0;
+    max-width: 40ch;
+    opacity: 0.8;
+    line-height: 1.5;
+  }
+  @media (max-width: 640px) {
+    .credit-banner { flex-direction: column; align-items: flex-start; }
+    .credit-banner > div:last-child { text-align: left !important; width: 100%; }
+    .credit-banner input { width: 100% !important; }
+  }
 
   .toolbar {
     display: flex;
@@ -300,6 +332,17 @@
       <p>Each visit is one event: what Bell Dentistry billed, what's still unpaid if it went on a payment plan, what Delta Dental reimbursed, and what that leaves to come from the HSA.</p>
     </header>
 
+    <div class="credit-banner">
+      <div>
+        <p class="credit-label">Starting Account Credit</p>
+        <p class="credit-hint">One family-wide balance, applied to each visit in date order (oldest first) until it runs out — same way Bell's own ledger consumes it.</p>
+      </div>
+      <div style="text-align:right;">
+        <input type="number" step="0.01" id="starting-credit-input" value="" placeholder="0.00" onchange="setStartingCredit(this.value)" style="width:130px; text-align:right; font-family:&#39;IBM Plex Mono&#39;,monospace; font-size:18px; font-weight:600; padding:8px 10px; border-radius:8px; border:1px solid rgba(255,255,255,0.4); background:rgba(255,255,255,0.15); color:white;">
+        <p class="credit-hint" style="margin-top:6px;">$0.00 remaining, unallocated</p>
+      </div>
+    </div>
+
     <div class="summary-grid">
       <div class="stat">
         <p class="label">Billed by Bell Dentistry</p>
@@ -451,6 +494,7 @@
 const STORAGE_KEY = 'dental_tracker_v1';
 const PATIENTS = ['Hannah', 'Chandler', 'Kristen', 'Riley', 'Carsen'];
 let entries = [];
+let startingCredit = '';
 let patientFilter = 'all';
 let statusFilter = 'all';
 let modalOpen = false;
@@ -556,12 +600,13 @@ async function loadFromStorage() {
       const raw = localStorage.getItem(STORAGE_KEY);
       if (raw) {
         const d = JSON.parse(raw);
-        if (d && Array.isArray(d.entries)) { entries = d.entries; return true; }
+        if (d && Array.isArray(d.entries)) { entries = d.entries; startingCredit = d.startingCredit || ''; return true; }
       }
     } catch (e) {}
     return false;
   }
   entries = src.entries;
+  startingCredit = src.startingCredit || '';
   return true;
 }
 
@@ -589,7 +634,7 @@ async function saveToCloud(data) {
 function debouncedSave() {
   clearTimeout(saveTimer);
   saveTimer = setTimeout(() => {
-    saveToCloud({ entries, savedAt: new Date().toISOString() });
+    saveToCloud({ entries, startingCredit, savedAt: new Date().toISOString() });
   }, 600);
 }
 
@@ -604,7 +649,6 @@ function normalize(e) {
     description: e.description || '',
     amountBilled: e.amountBilled !== undefined ? e.amountBilled : e.amountCharged,
     paidToBell: e.paidToBell !== undefined ? e.paidToBell : null,
-    creditApplied: e.creditApplied !== undefined ? e.creditApplied : null,
     amountReimbursed: e.amountReimbursed !== undefined ? e.amountReimbursed : e.reimbursementAmount
   };
 }
@@ -616,19 +660,43 @@ async function load() {
     entries = [];
   }
   entries = entries.map(normalize);
+  recomputeCreditAllocations();
   initialLoadComplete = true;
   loaded = true;
   render();
 }
-function persist() { debouncedSave(); }
+function persist() { recomputeCreditAllocations(); debouncedSave(); }
 async function retrySync() {
   await loadFromStorage();
   entries = entries.map(normalize);
+  recomputeCreditAllocations();
   render();
+}
+function setStartingCredit(val) {
+  startingCredit = val;
+  persist();
 }
 
 function reimbursedOf(e) { return num(e.amountReimbursed); }
-function creditAppliedOf(e) { return num(e.creditApplied) || 0; }
+
+// The account credit is a single running balance, consumed chronologically
+// across every visit (all patients share one family ledger) — same as how
+// Bell's own ledger works, rather than the user manually splitting it per visit.
+let creditAllocations = {};
+function recomputeCreditAllocations() {
+  let remaining = num(startingCredit) || 0;
+  const sorted = [...entries].sort((a, b) => (a.serviceDate || '').localeCompare(b.serviceDate || ''));
+  const map = {};
+  sorted.forEach(e => {
+    const billed = num(e.amountBilled) || 0;
+    const applied = Math.max(0, Math.min(remaining, billed));
+    remaining -= applied;
+    map[e.id] = { applied, remainingAfter: remaining };
+  });
+  creditAllocations = map;
+}
+function creditAppliedOf(e) { return (creditAllocations[e.id] || {}).applied || 0; }
+function creditRemainingAfter(e) { return (creditAllocations[e.id] || {}).remainingAfter ?? (num(startingCredit) || 0); }
 function hsaOf(e) {
   const r = reimbursedOf(e);
   if (r === null) return null;
@@ -653,7 +721,7 @@ function setPatientFilter(p) { patientFilter = p; render(); }
 function setStatusFilter(f) { statusFilter = f; render(); }
 
 function openAddModal() {
-  editingEntry = { id: null, patient: patientFilter !== 'all' ? patientFilter : '', serviceDate: '', description: '', amountBilled: '', paidToBell: '', creditApplied: '', amountReimbursed: '' };
+  editingEntry = { id: null, patient: patientFilter !== 'all' ? patientFilter : '', serviceDate: '', description: '', amountBilled: '', paidToBell: '', amountReimbursed: '' };
   modalOpen = true;
   render();
 }
@@ -707,9 +775,13 @@ function render() {
   const app = document.getElementById('app');
   if (!loaded) { app.innerHTML = '<p style="padding:40px;color:#8B978F;font-family:Inter,sans-serif;">Loading…</p>'; return; }
 
+  recomputeCreditAllocations();
   const patientScoped = patientFilter === 'all' ? entries : entries.filter(e => e.patient === patientFilter);
   const s = computeSummaryFor(patientScoped);
   const list = filteredEntries();
+  const creditRemaining = num(startingCredit) !== null
+    ? Math.max(0, (num(startingCredit) || 0) - Object.values(creditAllocations).reduce((sum, a) => sum + a.applied, 0))
+    : 0;
 
   app.innerHTML = `
     <header class="top">
@@ -717,6 +789,17 @@ function render() {
       <h1>Dental Claim Tracker</h1>
       <p>Each visit is one event: what Bell Dentistry billed, what's still unpaid if it went on a payment plan, what Delta Dental reimbursed, and what that leaves to come from the HSA.</p>
     </header>
+
+    <div class="credit-banner">
+      <div>
+        <p class="credit-label">Starting Account Credit</p>
+        <p class="credit-hint">One family-wide balance, applied to each visit in date order (oldest first) until it runs out — same way Bell's own ledger consumes it.</p>
+      </div>
+      <div style="text-align:right;">
+        <input type="number" step="0.01" id="starting-credit-input" value="${startingCredit}" placeholder="0.00" onchange="setStartingCredit(this.value)" style="width:130px; text-align:right; font-family:'IBM Plex Mono',monospace; font-size:18px; font-weight:600; padding:8px 10px; border-radius:8px; border:1px solid rgba(255,255,255,0.4); background:rgba(255,255,255,0.15); color:white;">
+        <p class="credit-hint" style="margin-top:6px;">${fmt(creditRemaining)} remaining, unallocated</p>
+      </div>
+    </div>
 
     <div class="summary-grid">
       <div class="stat">
@@ -846,11 +929,13 @@ function renderModal() {
             <input type="number" step="0.01" name="paidToBell" value="${e.paidToBell || ''}" placeholder="Leave blank if paid in full">
             <p class="hint">Only fill this in if less than the full amount was paid upfront — e.g. a down payment on Bell's payment plan for visits over $500. Update it to the full billed amount once you pay off the balance.</p>
           </div>
+          ${!isNew ? `
           <div class="field">
-            <label>Non-insurance credit applied</label>
-            <input type="number" step="0.01" name="creditApplied" value="${e.creditApplied || ''}" placeholder="Leave blank if none">
-            <p class="hint">Only for account credits unrelated to insurance (referral credit, billing correction, etc.). This reduces both the balance owed to Bell and the amount owed from the HSA — it's money that was never yours to begin with, so it isn't HSA-eligible.</p>
+            <label>Account credit applied</label>
+            <input type="text" value="${fmt(creditAppliedOf(e))}" disabled style="color:var(--ink-faint); cursor:not-allowed;">
+            <p class="hint">Calculated automatically from the starting account credit, applied in visit-date order across every patient. Adjust the starting credit at the top of the page if this looks wrong — not editable per visit.</p>
           </div>
+          ` : ''}
           <div class="field">
             <label>Reimbursed by Delta Dental</label>
             <input type="number" step="0.01" name="amountReimbursed" value="${e.amountReimbursed || ''}" placeholder="Leave blank if pending">
@@ -879,7 +964,6 @@ function wireModal() {
       description: fd.get('description'),
       amountBilled: fd.get('amountBilled'),
       paidToBell: fd.get('paidToBell') === '' ? null : fd.get('paidToBell'),
-      creditApplied: fd.get('creditApplied') === '' ? null : fd.get('creditApplied'),
       amountReimbursed: fd.get('amountReimbursed') === '' ? null : fd.get('amountReimbursed'),
     };
     saveModal(data);
