@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- saved from url=(0046)file:///C:/Users/hatch/Downloads/index_37.html -->
+<!-- saved from url=(0046)file:///C:/Users/hatch/Downloads/index_38.html -->
 <html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -707,8 +707,7 @@ function paidToBellOf(e) {
   return p !== null ? p : Math.max(0, (num(e.amountBilled) || 0) - creditAppliedOf(e));
 }
 function unpaidBalanceOf(e) {
-  const reimbursed = reimbursedOf(e) || 0;
-  return Math.max(0, (num(e.amountBilled) || 0) - creditAppliedOf(e) - paidToBellOf(e) - reimbursed);
+  return Math.max(0, (num(e.amountBilled) || 0) - creditAppliedOf(e) - paidToBellOf(e));
 }
 function statusOf(e) {
   const reimbursed = reimbursedOf(e);
@@ -927,7 +926,7 @@ function renderModal() {
           <div class="field">
             <label>Paid to Bell at time of service</label>
             <input type="number" step="0.01" name="paidToBell" value="${e.paidToBell || ''}" placeholder="Leave blank if paid in full">
-            <p class="hint">Only fill this in if less than the full amount was paid upfront — e.g. a down payment on Bell's payment plan for visits over $500. Update it to the full billed amount once you pay off the balance.</p>
+            <p class="hint">Only fill this in if less than the full amount was paid upfront (a payment-plan down payment). Once a Delta Dental check is actually forwarded to Bell, update this to include it too — "Reimbursed by Delta Dental" below only tracks the known amount, not whether it's reached Bell yet.</p>
           </div>
           ${!isNew ? `
           <div class="field">
