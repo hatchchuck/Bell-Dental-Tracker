@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- saved from url=(0046)file:///C:/Users/hatch/Downloads/index_38.html -->
+<!-- saved from url=(0046)file:///C:/Users/hatch/Downloads/index_40.html -->
 <html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -681,26 +681,40 @@ function reimbursedOf(e) { return num(e.amountReimbursed); }
 
 // The account credit is a single running balance, consumed chronologically
 // across every visit (all patients share one family ledger) — same as how
-// Bell's own ledger works, rather than the user manually splitting it per visit.
+// Bell's own ledger works. Alongside it, HSA obligation is walked as a
+// running cumulative total, floored at zero after each visit — so a credit
+// surplus on one visit properly finishes paying down a later visit's HSA
+// amount, and each visit's own displayed number is the real, final answer
+// rather than something you have to net against other visits yourself.
 let creditAllocations = {};
 function recomputeCreditAllocations() {
-  let remaining = num(startingCredit) || 0;
+  let remainingCredit = num(startingCredit) || 0;
+  let cumulativeHsaRaw = 0;
+  let priorFloored = 0;
   const sorted = [...entries].sort((a, b) => (a.serviceDate || '').localeCompare(b.serviceDate || ''));
   const map = {};
   sorted.forEach(e => {
     const billed = num(e.amountBilled) || 0;
-    const applied = Math.max(0, Math.min(remaining, billed));
-    remaining -= applied;
-    map[e.id] = { applied, remainingAfter: remaining };
+    const applied = Math.max(0, Math.min(remainingCredit, billed));
+    remainingCredit -= applied;
+
+    const reimbursed = num(e.amountReimbursed);
+    let hsaDisplay = null;
+    if (reimbursed !== null) {
+      cumulativeHsaRaw += (billed - reimbursed - applied);
+      const floored = Math.max(0, cumulativeHsaRaw);
+      hsaDisplay = floored - priorFloored;
+      priorFloored = floored;
+    }
+    map[e.id] = { applied, remainingAfter: remainingCredit, hsaDisplay };
   });
   creditAllocations = map;
 }
 function creditAppliedOf(e) { return (creditAllocations[e.id] || {}).applied || 0; }
 function creditRemainingAfter(e) { return (creditAllocations[e.id] || {}).remainingAfter ?? (num(startingCredit) || 0); }
 function hsaOf(e) {
-  const r = reimbursedOf(e);
-  if (r === null) return null;
-  return (num(e.amountBilled) || 0) - r - creditAppliedOf(e);
+  const alloc = creditAllocations[e.id];
+  return alloc ? alloc.hsaDisplay : null;
 }
 function paidToBellOf(e) {
   const p = num(e.paidToBell);
@@ -882,10 +896,10 @@ function renderEntry(e) {
         </div>
         <div class="fig hsa">
           <p class="label">Owed from HSA</p>
-          <p class="val ${hsa === null ? 'muted' : ''}">${hsa === null ? '—' : hsa < 0 ? fmt(0) + ' *' : fmt(hsa)}</p>
+          <p class="val ${hsa === null ? 'muted' : ''}">${hsa === null ? '—' : fmt(hsa)}</p>
         </div>
       </div>
-      ${credit > 0 ? `<p class="hint" style="margin-top:10px;">Credit applied: ${fmt(credit)}${hsa !== null && hsa < 0 ? ` — this visit's credit exceeded its own billed-minus-reimbursed amount by ${fmt(Math.abs(hsa))}; that surplus carries into the family total below rather than showing as a negative here.` : ''}</p>` : ''}
+      ${credit > 0 ? `<p class="hint" style="margin-top:10px;">Account credit applied: ${fmt(credit)}</p>` : ''}
       <div class="entry-actions">
         <button onclick="openEditModal('${e.id}')">Edit</button>
         <button class="danger-link" onclick="deleteEntry('${e.id}')">Delete</button>
