@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- saved from url=(0046)file:///C:/Users/hatch/Downloads/index_34.html -->
+<!-- saved from url=(0046)file:///C:/Users/hatch/Downloads/index_35.html -->
 <html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -402,6 +402,7 @@
           <p class="val ">$947.60</p>
         </div>
       </div>
+      
       <div class="entry-actions">
         <button onclick="openEditModal(&#39;e1784248316440c8a4b&#39;)">Edit</button>
         <button class="danger-link" onclick="deleteEntry(&#39;e1784248316440c8a4b&#39;)">Delete</button>
@@ -434,6 +435,7 @@
           <p class="val ">$167.00</p>
         </div>
       </div>
+      
       <div class="entry-actions">
         <button onclick="openEditModal(&#39;e1784248258054wpzla&#39;)">Edit</button>
         <button class="danger-link" onclick="deleteEntry(&#39;e1784248258054wpzla&#39;)">Delete</button>
@@ -602,6 +604,7 @@ function normalize(e) {
     description: e.description || '',
     amountBilled: e.amountBilled !== undefined ? e.amountBilled : e.amountCharged,
     paidToBell: e.paidToBell !== undefined ? e.paidToBell : null,
+    creditApplied: e.creditApplied !== undefined ? e.creditApplied : null,
     amountReimbursed: e.amountReimbursed !== undefined ? e.amountReimbursed : e.reimbursementAmount
   };
 }
@@ -625,17 +628,18 @@ async function retrySync() {
 }
 
 function reimbursedOf(e) { return num(e.amountReimbursed); }
+function creditAppliedOf(e) { return num(e.creditApplied) || 0; }
 function hsaOf(e) {
   const r = reimbursedOf(e);
   if (r === null) return null;
-  return (num(e.amountBilled) || 0) - r;
+  return (num(e.amountBilled) || 0) - r - creditAppliedOf(e);
 }
 function paidToBellOf(e) {
   const p = num(e.paidToBell);
-  return p !== null ? p : (num(e.amountBilled) || 0);
+  return p !== null ? p : Math.max(0, (num(e.amountBilled) || 0) - creditAppliedOf(e));
 }
 function unpaidBalanceOf(e) {
-  return Math.max(0, (num(e.amountBilled) || 0) - paidToBellOf(e));
+  return Math.max(0, (num(e.amountBilled) || 0) - creditAppliedOf(e) - paidToBellOf(e));
 }
 function statusOf(e) {
   const reimbursed = reimbursedOf(e);
@@ -648,7 +652,7 @@ function setPatientFilter(p) { patientFilter = p; render(); }
 function setStatusFilter(f) { statusFilter = f; render(); }
 
 function openAddModal() {
-  editingEntry = { id: null, patient: patientFilter !== 'all' ? patientFilter : '', serviceDate: '', description: '', amountBilled: '', paidToBell: '', amountReimbursed: '' };
+  editingEntry = { id: null, patient: patientFilter !== 'all' ? patientFilter : '', serviceDate: '', description: '', amountBilled: '', paidToBell: '', creditApplied: '', amountReimbursed: '' };
   modalOpen = true;
   render();
 }
@@ -767,6 +771,7 @@ function renderEntry(e) {
   const reimbursed = reimbursedOf(e);
   const hsa = hsaOf(e);
   const balance = unpaidBalanceOf(e);
+  const credit = creditAppliedOf(e);
 
   const pillLabel = status === 'onplan' ? 'On payment plan' : status === 'awaiting' ? 'Awaiting claim' : status === 'payoff' ? 'Ready to pay off' : 'Settled';
 
@@ -794,9 +799,10 @@ function renderEntry(e) {
         </div>
         <div class="fig hsa">
           <p class="label">Owed from HSA</p>
-          <p class="val ${hsa === null ? 'muted' : ''}">${hsa === null ? '—' : fmt(hsa)}</p>
+          <p class="val ${hsa === null ? 'muted' : ''}">${hsa === null ? '—' : hsa < 0 ? fmt(0) + ' *' : fmt(hsa)}</p>
         </div>
       </div>
+      ${credit > 0 ? `<p class="hint" style="margin-top:10px;">Credit applied: ${fmt(credit)}${hsa !== null && hsa < 0 ? ` — this visit's credit exceeded its own billed-minus-reimbursed amount by ${fmt(Math.abs(hsa))}; that surplus carries into the family total below rather than showing as a negative here.` : ''}</p>` : ''}
       <div class="entry-actions">
         <button onclick="openEditModal('${e.id}')">Edit</button>
         <button class="danger-link" onclick="deleteEntry('${e.id}')">Delete</button>
@@ -840,6 +846,11 @@ function renderModal() {
             <p class="hint">Only fill this in if less than the full amount was paid upfront — e.g. a down payment on Bell's payment plan for visits over $500. Update it to the full billed amount once you pay off the balance.</p>
           </div>
           <div class="field">
+            <label>Non-insurance credit applied</label>
+            <input type="number" step="0.01" name="creditApplied" value="${e.creditApplied || ''}" placeholder="Leave blank if none">
+            <p class="hint">Only for account credits unrelated to insurance (referral credit, billing correction, etc.). This reduces both the balance owed to Bell and the amount owed from the HSA — it's money that was never yours to begin with, so it isn't HSA-eligible.</p>
+          </div>
+          <div class="field">
             <label>Reimbursed by Delta Dental</label>
             <input type="number" step="0.01" name="amountReimbursed" value="${e.amountReimbursed || ''}" placeholder="Leave blank if pending">
             <p class="hint">Once this is filled in, the amount owed from the HSA is calculated automatically.</p>
@@ -867,6 +878,7 @@ function wireModal() {
       description: fd.get('description'),
       amountBilled: fd.get('amountBilled'),
       paidToBell: fd.get('paidToBell') === '' ? null : fd.get('paidToBell'),
+      creditApplied: fd.get('creditApplied') === '' ? null : fd.get('creditApplied'),
       amountReimbursed: fd.get('amountReimbursed') === '' ? null : fd.get('amountReimbursed'),
     };
     saveModal(data);
